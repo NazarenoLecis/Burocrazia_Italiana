@@ -162,13 +162,67 @@ jobs:
           assert all(path.stat().st_size > 0 for path in charts), "One or more charts are empty"
           PY
 
-      - name: Execute notebooks
+      - name: Execute notebooks with diagnostics
         run: |
-          mkdir -p /tmp/executed-notebooks
-          for notebook in notebooks/*.ipynb; do
-            jupyter nbconvert \
-              --to notebook \
-              --execute "$notebook" \
-              --output-dir /tmp/executed-notebooks \
-              --ExecutePreprocessor.timeout=600
-          done
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          project_root = Path.cwd()
+          executed_dir = Path("/tmp/executed-notebooks")
+          executed_dir.mkdir(parents=True, exist_ok=True)
+          log_path = Path("/tmp/notebook-execution.log")
+          failures = []
+          log_parts = []
+
+          for notebook in sorted((project_root / "notebooks").glob("*.ipynb")):
+              command = [
+                  "jupyter",
+                  "nbconvert",
+                  "--to",
+                  "notebook",
+                  "--execute",
+                  str(notebook),
+                  "--output-dir",
+                  str(executed_dir),
+                  "--ExecutePreprocessor.timeout=600",
+              ]
+              result = subprocess.run(
+                  command,
+                  cwd=project_root,
+                  text=True,
+                  capture_output=True,
+                  check=False,
+              )
+              section = "\n".join(
+                  [
+                      "=" * 80,
+                      f"NOTEBOOK: {notebook.name}",
+                      f"RETURN CODE: {result.returncode}",
+                      "STDOUT:",
+                      result.stdout,
+                      "STDERR:",
+                      result.stderr,
+                  ]
+              )
+              log_parts.append(section)
+              if result.returncode != 0:
+                  failures.append(notebook.name)
+                  print(section[-6000:])
+
+          log_path.write_text("\n".join(log_parts), encoding="utf-8")
+          if failures:
+              raise SystemExit(f"Notebook execution failed: {', '.join(failures)}")
+          PY
+
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-validation-diagnostics
+          path: |
+            /tmp/notebook-execution.log
+            /tmp/executed-notebooks
+          if-no-files-found: warn
+          retention-days: 1
