@@ -2,7 +2,7 @@
 
 Repository per raccogliere, pulire, integrare e analizzare dati relativi alla burocrazia italiana. Il progetto separa fonti, trasformazioni, indicatori, controlli di qualità e grafici, così ogni risultato può essere ricondotto al dato originario e replicato con la stessa configurazione.
 
-La prima versione concentra il lavoro sulle attività economiche e sulle amministrazioni pubbliche. La struttura è predisposta per integrare in seguito procedimenti rivolti a cittadini, professionisti ed enti.
+La prima versione concentra il lavoro sulle attività economiche e sulle amministrazioni pubbliche. La struttura è predisposta per integrare successivamente procedimenti rivolti a cittadini, professionisti ed enti.
 
 ## Obiettivo del progetto
 
@@ -48,7 +48,7 @@ La prima versione considera soprattutto la burocrazia collegata alle attività e
 - rinnovo di una licenza o concessione;
 - cessazione di un'attività.
 
-La copertura effettiva dipende dalle fonti già integrate. Nello stato iniziale il repository acquisisce l'anagrafica degli enti IPA e un dataset Eurostat sull'uso dei servizi pubblici online. Le fonti normative e i cataloghi dei procedimenti sono censiti nell'inventario e richiedono connettori successivi.
+La copertura effettiva dipende dalle fonti integrate. Nello stato iniziale il repository acquisisce l'anagrafica degli enti IPA e un dataset Eurostat sull'uso dei servizi pubblici online. Le fonti normative e i cataloghi dei procedimenti sono censiti nell'inventario e richiedono connettori successivi.
 
 ## Definizioni
 
@@ -139,8 +139,6 @@ I file prodotti nella cartella `output` sono esclusi dalla cronologia Git. I fil
 |---|---|---|---|
 | [Indice delle Pubbliche Amministrazioni - Enti](https://indicepa.gov.it/ipa-dati/dataset/enti) | Anagrafica degli enti, tipologia, sede, sito e recapiti | Download XLSX ufficiale | Anagrafica delle amministrazioni, indicatori di copertura e confronti per regione della sede |
 | [Eurostat - Data access via API](https://ec.europa.eu/eurostat/data/web-services) | Dataset `isoc_ciegi_ac` sull'uso dei servizi pubblici online | API REST, JSON-stat 2.0 | Indicatori di contesto digitale per Italia, UE e paesi selezionati |
-
-Il dataset IPA è pubblicato con licenza CC BY 4.0. Le condizioni di riuso Eurostat sono indicate sul portale istituzionale.
 
 ### Fonti censite e non ancora integrate
 
@@ -255,74 +253,39 @@ I notebook non contengono percorsi di output scritti direttamente. Importano le 
 
 ### `output/data/processed/source_inventory.csv`
 
-Unità di osservazione: fonte.
-
-Contiene istituzione, categoria, copertura, frequenza, metodo di accesso, formato, licenza, stato, ultimo aggiornamento riuscito e limitazioni.
+Unità di osservazione: fonte. Contiene istituzione, categoria, copertura, frequenza, metodo di accesso, formato, stato, ultimo aggiornamento riuscito e limitazioni.
 
 ### `output/data/clean/authorities.parquet`
 
-Unità di osservazione: ente presente in IPA.
-
-Colonne principali:
-
-- `authority_id`;
-- `authority_code`;
-- `authority_name_original`;
-- `authority_name_standardized`;
-- `authority_type`;
-- `territorial_level`;
-- `region_code`;
-- `province_code`;
-- `municipality_code`;
-- `website`;
-- `digital_address`;
-- `source_id`;
-- `source_url`;
-- `retrieved_at`.
-
-La versione CSV è salvata in `output/data/clean/authorities.csv`.
+Unità di osservazione: ente presente in IPA. Le colonne principali comprendono identificatore dell'ente, codice IPA, denominazione originale e standardizzata, tipologia, livello territoriale, codici territoriali, sito, recapito digitale e metadati della fonte. La versione CSV è salvata in `output/data/clean/authorities.csv`.
 
 ### `output/data/clean/legal_acts.parquet`
 
-Unità di osservazione prevista: atto normativo.
-
-Nella prima versione la tabella è vuota perché il connettore Normattiva non è ancora implementato. Lo schema è già disponibile per evitare modifiche incompatibili nei passaggi successivi.
+Unità di osservazione prevista: atto normativo. Nella prima versione la tabella è vuota perché il connettore Normattiva non è ancora implementato. Lo schema è già disponibile per evitare modifiche incompatibili nei passaggi successivi.
 
 ### `output/data/clean/legal_provisions.parquet`
 
-Unità di osservazione prevista: articolo, comma, lettera o altra disposizione.
-
-La tabella include flag trasparenti per selezionare possibili obblighi, termini, rinnovi e sanzioni. I flag non identificano automaticamente un onere burocratico.
+Unità di osservazione prevista: articolo, comma, lettera o altra disposizione. La tabella include flag trasparenti per selezionare possibili obblighi, termini, rinnovi e sanzioni. I flag servono alla revisione e non rappresentano una classificazione automatica definitiva.
 
 ### `output/data/clean/administrative_procedures.parquet`
 
-Unità di osservazione prevista: procedimento amministrativo.
-
-La tabella iniziale è vuota. Verrà popolata con cataloghi SUAP, SUE e altre fonti ufficiali.
+Unità di osservazione prevista: procedimento amministrativo. La tabella iniziale è vuota e verrà popolata con cataloghi SUAP, SUE e altre fonti ufficiali.
 
 ### `output/data/clean/eurostat_egovernment_long.parquet`
 
-Unità di osservazione: cella non nulla del dataset JSON-stat Eurostat.
-
-Il file conserva codici ed etichette delle dimensioni originarie.
+Unità di osservazione: cella non nulla del dataset JSON-stat Eurostat. Il file conserva codici ed etichette delle dimensioni originarie.
 
 ### `output/data/processed/bureaucracy_indicators.parquet`
 
-Unità di osservazione: indicatore, territorio, periodo e breakdown.
-
-Contiene indicatori descrittivi sull'anagrafica IPA e indicatori Eurostat di contesto digitale. La versione CSV è salvata nello stesso percorso con estensione `.csv`.
+Unità di osservazione: indicatore, territorio, periodo e breakdown. Contiene indicatori descrittivi sull'anagrafica IPA e indicatori Eurostat di contesto digitale. La versione CSV è salvata nello stesso percorso.
 
 ### `output/data/processed/territorial_comparisons.parquet`
 
-Unità di osservazione: indicatore e regione.
-
-La prima versione confronta numerosità e disponibilità di recapiti IPA per regione della sede. La versione CSV è salvata nello stesso percorso.
+Unità di osservazione: indicatore e regione. La prima versione confronta numerosità e disponibilità di recapiti IPA per regione della sede. La versione CSV è salvata nello stesso percorso.
 
 ### `output/data/quality/data_quality_report.csv`
 
-Unità di osservazione: controllo applicato a un dataset.
-
-Contiene stato, righe interessate, quota interessata, severità, descrizione e data di generazione.
+Unità di osservazione: controllo applicato a un dataset. Contiene stato, righe interessate, quota interessata, severità, descrizione e data di generazione.
 
 ## Grafici prodotti
 
@@ -347,16 +310,7 @@ La priorità delle modalità di accesso è:
 5. documento PDF;
 6. importazione manuale documentata.
 
-Ogni download salva, quando disponibile:
-
-- fonte;
-- URL richiesto e URL risolto;
-- data e ora UTC;
-- stato HTTP;
-- tipo di contenuto;
-- dimensione del file;
-- hash SHA-256;
-- ETag e data di ultima modifica comunicati dal server.
+Ogni download salva, quando disponibile, fonte, URL richiesto e risolto, data e ora UTC, stato HTTP, tipo di contenuto, dimensione del file, hash SHA-256, ETag e data di ultima modifica comunicati dal server.
 
 I dati grezzi non vengono sovrascritti con dati puliti.
 
@@ -372,11 +326,7 @@ Il livello territoriale è una classificazione operativa ottenuta da tipologia e
 
 ### Indicatori IPA
 
-Gli indicatori iniziali misurano:
-
-- numero di record IPA;
-- quota di record con sito istituzionale;
-- quota di record con un recapito digitale valorizzato.
+Gli indicatori iniziali misurano il numero di record IPA, la quota di record con sito istituzionale e la quota di record con un recapito digitale valorizzato.
 
 Questi indicatori descrivono l'anagrafica e la disponibilità dei campi. Non misurano la qualità del servizio, la capacità amministrativa o l'onere sostenuto da imprese e cittadini.
 
@@ -392,12 +342,7 @@ Le espressioni regolari presenti in `scripts/config.py` servono a selezionare di
 
 ### Confronti territoriali
 
-Un confronto viene accompagnato da:
-
-- numero di osservazioni;
-- quota di copertura;
-- numero di fonti;
-- flag di qualità.
+Un confronto viene accompagnato da numero di osservazioni, quota di copertura, numero di fonti e flag di qualità.
 
 La soglia minima iniziale è definita in `QUALITY_MIN_OBSERVATIONS`. I territori con numerosità insufficiente non devono essere usati per classifiche.
 
@@ -462,12 +407,12 @@ Per aggiornare tutte le fonti implementate:
 4. verificare le variazioni anomale rispetto all'esecuzione precedente;
 5. ripristinare `FORCE_DOWNLOAD = False`.
 
-Prima di pubblicare risultati aggiornati, controllare che la fonte non abbia modificato colonne, definizioni o licenza.
+Prima di pubblicare risultati aggiornati, controllare che la fonte non abbia modificato colonne, definizioni o modalità di accesso.
 
 ## Come aggiungere una nuova fonte
 
 1. Inserire la fonte in `DATA_SOURCES` dentro `scripts/config.py`.
-2. Documentare istituzione, copertura, frequenza, accesso, formato, licenza e limitazioni.
+2. Documentare istituzione, copertura, frequenza, accesso, formato e limitazioni.
 3. Verificare l'endpoint o il download sulla documentazione ufficiale.
 4. Aggiungere una funzione di acquisizione nel file operativo pertinente.
 5. Salvare il contenuto originario in `output/data/raw`.
@@ -478,9 +423,3 @@ Prima di pubblicare risultati aggiornati, controllare che la fonte non abbia mod
 10. Aggiornare README, inventario, notebook e grafici pertinenti.
 
 Non inserire endpoint ipotetici, dati fittizi o risultati simulati.
-
-## Licenze e condizioni d'uso
-
-Il codice del repository deve essere accompagnato da una licenza scelta dal titolare del progetto. I dati mantengono le licenze e le condizioni d'uso delle fonti originarie.
-
-La presenza di un URL pubblico non implica automaticamente libertà di riuso. Prima di redistribuire dati o estratti verificare licenza, attribuzione richiesta, condizioni tecniche e limiti della fonte.
